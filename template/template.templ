@@ -1,0 +1,43 @@
+package template
+
+import (
+	"fmt"
+	"github.com/webdevfuel/htmx-loading-indicator/template/layout"
+	"github.com/webdevfuel/htmx-loading-indicator/user"
+)
+
+templ Users(users []user.User) {
+	@layout.Layout() {
+		<p class="text-2xl font-bold mt-8">Users</p>
+		<div id="users" class="space-y-2 mt-8">
+			for _, user := range users {
+				@UserRow(user)
+			}
+		</div>
+		@UserForm()
+	}
+}
+
+templ UserRow(user user.User) {
+	<div id={ userId(user.ID, false) } class="flex items-center justify-between border border-gray-100 rounded-lg p-4 shadow-sm">
+		<p class="text-sm">{ user.Email }</p>
+		<button type="button" hx-target={ userId(user.ID, true) } hx-swap="delete" hx-delete={ fmt.Sprintf("/users/%s", user.ID) } class="p-1 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-800 text-white">
+			Delete
+		</button>
+	</div>
+}
+
+func userId(id string, appendPound bool) string {
+	s := fmt.Sprintf("user-%s", id)
+	if appendPound {
+		return fmt.Sprintf("#%s", s)
+	}
+	return s
+}
+
+templ UserForm() {
+	<form hx-post="/users" hx-target="#users" hx-swap="beforeend" class="flex space-x-2 mt-8">
+		<input type="text" id="email" name="email" class="w-full rounded-lg border-gray-300 focus:border-gray-300 focus:ring-2 focus:ring-offset-1 text-sm focus:ring-blue-700"/>
+		<button class="py-2 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-800 text-white">Add</button>
+	</form>
+}
